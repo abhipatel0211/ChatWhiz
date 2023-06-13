@@ -57,7 +57,7 @@ const Chat = () => {
 </svg>
         </div>
         {Object.keys(onlinePeople).map(userId => (
-          <div className='border-b border-gray-100 py-2 flex items-center gap-2'>
+          <div className='border-b border-gray-100 py-2 flex items-center gap-2 bg-amber-300 border'>
             <Avtar />
             <span>{onlinePeople[userId]}</span>
           </div>
