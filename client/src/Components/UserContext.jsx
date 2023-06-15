@@ -8,8 +8,9 @@ export function UserContextProvider({ children }) {
   const [email, setemail] = useState(null);
   const [id, setId] = useState(null);
   useEffect(() => {
-    axios.get('http://localhost:4000/profile', { withCredentials: true  }).then((res) => {
-      setId(res.data.id),
+    axios.get('http://localhost:4000/profile', { withCredentials: true }).then((res) => {
+      console.log("inside useconstext " + res.data.userId);
+      setId(res.data.userId),
       setemail(res.data.email)
     })
     .catch(error => {

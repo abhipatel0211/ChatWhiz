@@ -1,9 +1,13 @@
-import React, { useEffect, useState } from 'react'
+import React, { useContext, useEffect, useState } from 'react'
 import Avtar from './Avtar';
+import Logo from './Logo';
+import { UserContext } from './UserContext';
 
 const Chat = () => {
   const [ws, setWs] = useState(null);
   const [onlinePeople, setOnlinePeople] = useState({});
+  const [selectedUserId, setselectedUserId] = useState(null);
+  const { email,id  } = useContext(UserContext);
 
 
   useEffect(() => {
@@ -43,32 +47,33 @@ const Chat = () => {
     // })
   }
 
+  // function selectContact(userId) {
+
+  // }
+
+  const onlinePeopleExclOurUser = { ...onlinePeople };
+  delete onlinePeopleExclOurUser[id];
+  console.log("hello online" +id+" "+email);
+  console.log(onlinePeopleExclOurUser);
+
   return (
     <div className='flex h-screen'>
-      <div className="bg-white w-1/3 p-2">
-        <div className='text-blue-600 bold bg-gray-300 flex justify-center items-center text-3xl mb-4 gap-8'>
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
-  <path fillRule="evenodd" d="M4.804 21.644A6.707 6.707 0 006 21.75a6.721 6.721 0 003.583-1.029c.774.182 1.584.279 2.417.279 5.322 0 9.75-3.97 9.75-9 0-5.03-4.428-9-9.75-9s-9.75 3.97-9.75 9c0 2.409 1.025 4.587 2.674 6.192.232.226.277.428.254.543a3.73 3.73 0 01-.814 1.686.75.75 0 00.44 1.223zM8.25 10.875a1.125 1.125 0 100 2.25 1.125 1.125 0 000-2.25zM10.875 12a1.125 1.125 0 112.25 0 1.125 1.125 0 01-2.25 0zm4.875-1.125a1.125 1.125 0 100 2.25 1.125 1.125 0 000-2.25z" clipRule="evenodd" />
-</svg>
-
-          AP CHAT
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
-  <path fillRule="evenodd" d="M4.804 21.644A6.707 6.707 0 006 21.75a6.721 6.721 0 003.583-1.029c.774.182 1.584.279 2.417.279 5.322 0 9.75-3.97 9.75-9 0-5.03-4.428-9-9.75-9s-9.75 3.97-9.75 9c0 2.409 1.025 4.587 2.674 6.192.232.226.277.428.254.543a3.73 3.73 0 01-.814 1.686.75.75 0 00.44 1.223zM8.25 10.875a1.125 1.125 0 100 2.25 1.125 1.125 0 000-2.25zM10.875 12a1.125 1.125 0 112.25 0 1.125 1.125 0 01-2.25 0zm4.875-1.125a1.125 1.125 0 100 2.25 1.125 1.125 0 000-2.25z" clipRule="evenodd" />
-</svg>
-        </div>
-        {Object.keys(onlinePeople).map(userId => (
-          <div className='border-b border-gray-100 py-2 flex items-center gap-2 bg-amber-300 border'>
-            <Avtar />
-            <span>{onlinePeople[userId]}</span>
+      <div className="bg-white w-1/3">
+        <Logo />
+        {Object.keys(onlinePeopleExclOurUser).map(userId => (
+          <div key={userId} onClick={ () => setselectedUserId(userId)} className={"border-b border-gray-100 py-2 pl-4 flex items-center gap-2 border cursor-pointer " + (userId === selectedUserId ? 'bg-blue-200':'')}>
+            {userId === sle}
+            <Avtar email={onlinePeople[userId]} userId={userId}  />
+            <span className="text-gray-800" >{onlinePeople[userId]}</span>
           </div>
         ))}
       </div>
       <div className="flex flex-col bg-blue-200 w-2/3 p-2">
         <div className="flex-grow" >
-          <div className='text-blue-600 bold bg-gray-300 flex justify-center items-center text-3xl justify-around'>
+          <div className='text-blue-600 bold flex justify-center items-center text-3xl '>
           <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
-  <path fillRule="evenodd" d="M12.516 2.17a.75.75 0 00-1.032 0 11.209 11.209 0 01-7.877 3.08.75.75 0 00-.722.515A12.74 12.74 0 002.25 9.75c0 5.942 4.064 10.933 9.563 12.348a.749.749 0 00.374 0c5.499-1.415 9.563-6.406 9.563-12.348 0-1.39-.223-2.73-.635-3.985a.75.75 0 00-.722-.516l-.143.001c-2.996 0-5.717-1.17-7.734-3.08zm3.094 8.016a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clipRule="evenodd" />
-</svg>
+            <path fillRule="evenodd" d="M12.516 2.17a.75.75 0 00-1.032 0 11.209 11.209 0 01-7.877 3.08.75.75 0 00-.722.515A12.74 12.74 0 002.25 9.75c0 5.942 4.064 10.933 9.563 12.348a.749.749 0 00.374 0c5.499-1.415 9.563-6.406 9.563-12.348 0-1.39-.223-2.73-.635-3.985a.75.75 0 00-.722-.516l-.143.001c-2.996 0-5.717-1.17-7.734-3.08zm3.094 8.016a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clipRule="evenodd" />
+          </svg>
 
           messages with selected person
 
