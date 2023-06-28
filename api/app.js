@@ -7,6 +7,7 @@ dotenv.config();
 const User = require("./models/Users");
 const bcrypt = require("bcryptjs");
 const ws = require('ws');
+const Message = require("./models/Message");
 
 
 const cors = require('cors');
@@ -174,6 +175,9 @@ const server = app.listen(4000, () => {
 // here ws is  a library of web server and wss is a web socket server
 const wss = new ws.WebSocketServer({ server });
 wss.on("connection", (connection, req) => {
+    //Read email and id form the cookie  for this connection
+
+
     console.log('connected ws');
     // connection.send('hello ap'); //it will send the message to the client
     console.log(req.headers); //now by this header we get to many information and in that info we also get the cookie which we stored so by that cookie we can get the information of the user with user name and other things as well
@@ -198,10 +202,39 @@ wss.on("connection", (connection, req) => {
             }
         }
     }
+
+    connection.on('message', async (message) => {
+        const messageData = JSON.parse(message.toString());
+        console.log(messageData);
+        const { recipient, text } = messageData;
+        if (recipient && text) {
+            //now first save the message
+            const messageDoc =await Message.create({
+                sender: connection.userId,
+                recipient,
+                text,
+            });
+
+            //we can use find method here but it will just point to the very first user only but if the user is connected with more than one devices than filter will find all of them thus we use filter here
+            console.log("hello");
+            [...wss.clients].filter(c => c.userId === recipient)
+                .forEach(c => c.send(JSON.stringify({
+                    text,
+                    sender: connection.userId,
+                    recipient,
+                    id:messageDoc._id,
+                })));
+        }
+    });
+
+
+
     //now to see that who is online and converting to array  by  [...wss.clients]
     console.log("connection that are online")
     console.log([...wss.clients].length);//total number of connection online
     console.log([...wss.clients].map((c) => c.email));//total number of connection online
+
+    //notify everyone about the online people (when someone connects)
 
     [...wss.clients].forEach((client) => {
         client.send(JSON.stringify({

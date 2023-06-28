@@ -1,13 +1,19 @@
-import React, { useContext, useEffect, useState } from 'react'
+//Done upto 3:20 hrs
+
+import React, { useContext, useEffect, useRef, useState } from 'react'
 import Avtar from './Avtar';
 import Logo from './Logo';
 import { UserContext } from './UserContext';
+import { uniqBy } from 'lodash';
 
 const Chat = () => {
   const [ws, setWs] = useState(null);
   const [onlinePeople, setOnlinePeople] = useState({});
   const [selectedUserId, setselectedUserId] = useState(null);
-  const { email,id  } = useContext(UserContext);
+  const [newMessageText, setNewMessageText] = useState('');
+  const [messages, setMessages] = useState([]);
+  const { email, id } = useContext(UserContext);
+  const divUnderMessages = useRef();
 
 
   useEffect(() => {
@@ -34,6 +40,33 @@ const Chat = () => {
     setOnlinePeople(people);
   }
 
+  function sendMessage(ev) {
+    ev.preventDefault();
+    console.log("sending message");
+
+    ws.send(JSON.stringify({
+        recipient: selectedUserId,
+        text: newMessageText,
+    }));
+    setNewMessageText('');
+    setMessages(prev => ([...prev, {
+      text: newMessageText,
+      sender: id,
+      recipient: selectedUserId,
+      id:Date.now(),
+    }]));
+  }
+
+  useEffect(() => {
+    const div = divUnderMessages.current; //it is the refreance to letest
+    if (div) {
+      div.scrollIntoView({ behavior: 'smooth' });
+    }
+    
+    // console.log(div);
+    // div.scrolltop = div.scrollHeight
+  }, [messages]);
+
 
   function handleMessage(ev) {
     // console.log('new message', ev.data);
@@ -41,6 +74,12 @@ const Chat = () => {
     console.log(messageData);
     if ('online' in messageData) {
       showOnlinePeople(messageData.online);
+    }
+    else if( 'text' in messageData) {
+      // console.log({ messageData });
+
+      //now to handle the message received by the other user we have to put it in the messages array as down
+      setMessages(prev => ([...prev , {...messageData}]))
     }
     // ev.data.text().then(messageString => {
     //   console.log(messageString);
@@ -53,45 +92,71 @@ const Chat = () => {
 
   const onlinePeopleExclOurUser = { ...onlinePeople };
   delete onlinePeopleExclOurUser[id];
-  console.log("hello online" +id+" "+email);
-  console.log(onlinePeopleExclOurUser);
+  // console.log("hello online" +id+" "+email);
+  // console.log(onlinePeopleExclOurUser);
+
+  const messageWithoutDups = uniqBy(messages, 'id');
+  // const messageWithoutDups = messages;
 
   return (
     <div className='flex h-screen'>
       <div className="bg-white w-1/3">
         <Logo />
         {Object.keys(onlinePeopleExclOurUser).map(userId => (
-          <div key={userId} onClick={ () => setselectedUserId(userId)} className={"border-b border-gray-100 py-2 pl-4 flex items-center gap-2 border cursor-pointer " + (userId === selectedUserId ? 'bg-blue-200':'')}>
-            {userId === sle}
+          <div key={userId} onClick={ () => setselectedUserId(userId)} className={"border-b border-gray-100 flex items-center gap-2 border cursor-pointer " + (userId === selectedUserId ? 'bg-blue-200':'')}>
+            {userId === selectedUserId && (
+              <div className="w-1 bg-blue-500 h-12 rounded-md"></div>
+            )}
+            <div className="flex gap-2 py-2 pl-4 items-center justify-center">
             <Avtar email={onlinePeople[userId]} userId={userId}  />
             <span className="text-gray-800" >{onlinePeople[userId]}</span>
+            </div>
           </div>
         ))}
       </div>
       <div className="flex flex-col bg-blue-200 w-2/3 p-2">
         <div className="flex-grow" >
-          <div className='text-blue-600 bold flex justify-center items-center text-3xl '>
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
-            <path fillRule="evenodd" d="M12.516 2.17a.75.75 0 00-1.032 0 11.209 11.209 0 01-7.877 3.08.75.75 0 00-.722.515A12.74 12.74 0 002.25 9.75c0 5.942 4.064 10.933 9.563 12.348a.749.749 0 00.374 0c5.499-1.415 9.563-6.406 9.563-12.348 0-1.39-.223-2.73-.635-3.985a.75.75 0 00-.722-.516l-.143.001c-2.996 0-5.717-1.17-7.734-3.08zm3.094 8.016a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clipRule="evenodd" />
-          </svg>
 
-          messages with selected person
-
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className="w-6 h-6">
-  <path fillRule="evenodd" d="M12.516 2.17a.75.75 0 00-1.032 0 11.209 11.209 0 01-7.877 3.08.75.75 0 00-.722.515A12.74 12.74 0 002.25 9.75c0 5.942 4.064 10.933 9.563 12.348a.749.749 0 00.374 0c5.499-1.415 9.563-6.406 9.563-12.348 0-1.39-.223-2.73-.635-3.985a.75.75 0 00-.722-.516l-.143.001c-2.996 0-5.717-1.17-7.734-3.08zm3.094 8.016a.75.75 0 10-1.22-.872l-3.236 4.53L9.53 12.22a.75.75 0 00-1.06 1.06l2.25 2.25a.75.75 0 001.14-.094l3.75-5.25z" clipRule="evenodd" />
-</svg>
-
-          </div>
+            {!selectedUserId && (
+            <div className="flex h-full flex-grow items-center justify-center">
+              <div className='text-gray-400'>
+              &larr; Select the person from sidebar
+              </div>
+              </div>
+          )}
+          {!!selectedUserId && (
+            <div className="relative h-full">
+              <div className="overflow-y-scroll absolute top-0 left-0 right-0 bottom-2 ">
+                {messageWithoutDups.map(message => (
+                  <div className={(message.sender === id ? 'text-right': 'text-left' )}>
+                    <div className={"text-left inline-block p-2  m-2 rounded-md  text-sm " + (message.sender === id ? 'bg-blue-500 text-white ' : 'bg-white text-gray-500')}>
+                      sender:{message.sender}<br />
+                      my id:{id}<br />
+                      {message.text}
+                    </div>
+                  </div>
+                ))}
+                <div ref={divUnderMessages}></div>
+              </div>
+            </div>
+          )}
         </div>
-        <div className="flex mx-2 gap-2"> 
-          <input type="text" className="flex-grow bg-white border p-2 rounded-md" placeholder="Type your message here" />
-          <button className=" bg-blue-500 text-white p-2 rounded-md">
-            <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
-  <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
-</svg>
+        {
+          !!selectedUserId && ( //two !! means it will be in true or false
+                <form className="flex mx-2 gap-2" onSubmit={sendMessage}> 
+              <input type="text" className="flex-grow bg-white border p-2 rounded-md"
+                value={newMessageText}
+                onChange={ev => setNewMessageText(ev.target.value)}
+                placeholder="Type your message here" />
+              <button type="submit" className=" bg-blue-500 text-white p-2 rounded-md">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor" className="w-6 h-6">
+                <path strokeLinecap="round" strokeLinejoin="round" d="M6 12L3.269 3.126A59.768 59.768 0 0121.485 12 59.77 59.77 0 013.27 20.876L5.999 12zm0 0h7.5" />
+              </svg>
 
-          </button>
-        </div>
+              </button>
+            </form>
+          )
+        }
       </div>
     </div>
   )
