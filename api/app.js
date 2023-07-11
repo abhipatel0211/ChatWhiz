@@ -8,9 +8,11 @@ const User = require("./models/Users");
 const bcrypt = require("bcryptjs");
 const ws = require("ws");
 const Message = require("./models/Message");
+const fs = require("fs");
 
 const cors = require("cors");
 const app = express();
+app.use("/uploads", express.static(__dirname + "/uploads"));
 app.use(cors());
 
 console.log(process.env.CLIENT_URL);
@@ -89,10 +91,10 @@ app.get("/messages/:userId", async (req, res) => {
   try {
     // res.json(req.params);
     const { userId } = req.params;
-    console.log("here req " + req.cookies.token);
+    // console.log("here req " + req.cookies.token);
     const userData = await getUserDataFromRequest(req);
     // console.log("userid  "+userId);
-    console.log("userdata " + userData);
+    // console.log("userdata " + userData);
     const ourUserId = userData.userId;
     const messages = await Message.find({
       sender: { $in: [userId, ourUserId] },
@@ -112,22 +114,23 @@ app.get("/people", async (req, res) => {
 });
 
 app.get("/profile", (req, res) => {
-  console.log(req.cookies.token);
+  // console.log(req.cookies.token);
   const token = req.cookies?.token;
-  console.log("inside profile");
-  console.log(token);
-  console.log(jwtSecret);
+  // console.log("inside profile");
+  // console.log(token);
+  // console.log(jwtSecret);
   // console.log(Userdata);
   if (token) {
-    console.log("test");
+    // console.log("test");
     jwt.verify(token, jwtSecret, {}, (err, Userdata) => {
-      console.log(err);
-      console.log("profile");
-      console.log(Userdata);
+      //this verify part is the middleware
+      // console.log(err);
+      // console.log("profile");
+      // console.log(Userdata);
       if (err) {
         throw err;
       }
-      console.log("now responding");
+      // console.log("now responding");
       res.json(Userdata);
     });
   } else {
@@ -143,7 +146,7 @@ app.post("/login", async (req, res) => {
     if (foundemail) {
       console.log(email);
       const passOk = bcrypt.compareSync(password, foundemail.password);
-      console.log(passOk);
+      // console.log(passOk);
       if (passOk) {
         console.log(password);
         jwt.sign(
@@ -155,7 +158,7 @@ app.post("/login", async (req, res) => {
             if (err) {
               throw err;
             }
-            console.log(token);
+            // console.log(token);
             res
               .cookie("token", token, {
                 domain: "localhost",
@@ -183,12 +186,17 @@ app.post("/login", async (req, res) => {
   }
 });
 
+app.post("/logout", (req, res) => {
+  // console.log("in logout");
+  res.cookie("token", "", { sameSite: "none", secure: true }).json("ok");
+});
+
 // const db = "mongodb://127.0.0.1:27017/mern-chat";
 app.post("/register", async (req, res) => {
   // res.json("inside reg");
   console.log(req.body);
   const { email, password } = req.body;
-  console.log(email);
+  // console.log(email);
   try {
     const hashpassword = bcrypt.hashSync(password, bcryptSalt);
     const createdUser = await User.create({
@@ -204,7 +212,7 @@ app.post("/register", async (req, res) => {
         if (err) {
           throw err;
         }
-        console.log(token);
+        // console.log(token);
         res
           .cookie("token", token, {
             domain: "localhost",
@@ -246,8 +254,8 @@ const wss = new ws.WebSocketServer({ server });
 
 wss.on("connection", (connection, req) => {
   //Read email and id form the cookie  for this connection
-  console.log("connected ws");
-  console.log(req.headers); //now by this header we get to many information and in that info we also get the cookie which we stored so by that cookie we can get the information of the user with user name and other things as well
+  // console.log("connected ws");
+  // console.log(req.headers); //now by this header we get to many information and in that info we also get the cookie which we stored so by that cookie we can get the information of the user with user name and other things as well
 
   function notifyAboutOnlinePeople() {
     //notify everyone about the online people (when someone connects)
@@ -270,11 +278,14 @@ wss.on("connection", (connection, req) => {
     connection.ping();
     connection.deathTimer = setInterval(() => {
       connection.isAlive = false;
-      // console.log("dead");
+      clearInterval(connection.timer);
+      clearInterval(connection.deathTimer);
+      clearInterval(connection.timer);
       connection.terminate();
+      console.log("dead");
       notifyAboutOnlinePeople();
     }, 1000);
-  }, 10000); //here it will check after every 10 seconds that is the connection is online with the ping method
+  }, 5000); //here it will check after every 10 seconds that is the connection is online with the ping method
 
   connection.on("pong", () => {
     // console.log("pong");
@@ -291,12 +302,12 @@ wss.on("connection", (connection, req) => {
     if (tokenCookieString) {
       const token = tokenCookieString.split("=")[1];
       if (token) {
-        console.log(token); // only token
+        // console.log(token); // only token
         jwt.verify(token, jwtSecret, {}, (err, Userdata) => {
           if (err) {
             throw err;
           }
-          console.log(Userdata); //we will get the user information from the cookies
+          // console.log(Userdata); //we will get the user information from the cookies
           const { userId, email } = Userdata;
           connection.userId = userId;
           connection.email = email;
@@ -308,15 +319,30 @@ wss.on("connection", (connection, req) => {
   connection.on("message", async (message) => {
     const messageData = JSON.parse(message.toString());
     // console.log(messageData);
-    const { recipient, text } = messageData;
-    if (recipient && text) {
+    const { recipient, text, file } = messageData;
+    let filename = null;
+    if (file) {
+      //here data is 64 encoded
+      console.log({ file });
+      console.log("size", file.data.length);
+      const parts = file.name.split(".");
+      const ext = parts[parts.length - 1];
+      filename = Date.now() + "." + ext;
+      const path = __dirname + "/uploads/" + filename; //it will save the file in the upload directory
+      const bufferData = new Buffer(file.data.split(",")[1], "base64");
+      fs.writeFile(path, bufferData, () => {
+        console.log("file saved" + path);
+      });
+    }
+    if (recipient && (text || file)) {
       //now first save the message
       const messageDoc = await Message.create({
         sender: connection.userId,
         recipient,
         text,
+        file: file ? filename : null,
       });
-
+      console.log("message created");
       //we can use find method here but it will just point to the very first user only but if the user is connected with more than one devices than filter will find all of them thus we use filter here
       // console.log("hello");
       [...wss.clients]
@@ -327,6 +353,7 @@ wss.on("connection", (connection, req) => {
               text,
               sender: connection.userId,
               recipient,
+              file: file ? filename : null,
               _id: messageDoc._id,
             })
           )
