@@ -193,7 +193,8 @@ const Chat = () => {
         })
         .then((res) => {
           // Handle the response data
-          // console.log(response.data);
+          // console.log(res.data.filebase64);
+          // if(res.data.)
           // const { data } = res;
           setMessages(res.data);
           // Perform further actions with the data
@@ -236,6 +237,38 @@ const Chat = () => {
 
   const messageWithoutDups = uniqBy(messages, "_id");
   // const messageWithoutDups = messages;
+
+  // function base64ToFile(base64Data, filename) {
+  //   const arr = base64Data.split(",");
+  //   const mimeType = arr[0].match(/:(.*?);/)[1];
+  //   const bstr = atob(arr[1]);
+  //   let n = bstr.length;
+  //   const u8arr = new Uint8Array(n);
+  //   while (n--) {
+  //     u8arr[n] = bstr.charCodeAt(n);
+  //   }
+  //   return new File([u8arr], filename, { type: mimeType });
+  // }
+
+  // function getFileMimeType(filename) {
+  //   const extension = filename.split(".").pop();
+  //   switch (extension.toLowerCase()) {
+  //     case "jpg":
+  //     case "jpeg":
+  //       return "image/jpeg";
+  //     case "png":
+  //       return "image/png";
+  //     case "gif":
+  //       return "image/gif";
+  //     case "pdf":
+  //       return "application/pdf";
+  //     case "txt":
+  //       return "text/plain";
+  //     // Add more cases for other file types as needed
+  //     default:
+  //       return "application/octet-stream";
+  //   }
+  // }
 
   return (
     <div className="flex h-screen">
@@ -319,16 +352,54 @@ const Chat = () => {
                       my id:{id}
                       <br /> */}
                       {message.text}
-                      {message.file && (
+                      {message.file && message.filebase64 && (
                         <div className="flex ">
+                          {/* <a
+                            className="flex items-center gap-1 border-b"
+                            href={URL.createObjectURL(`data:${getFileMimeType(
+                              message.file
+                            )};base64, ${message.filebase64.split(",")[1]}`)}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            // href={`data:${getFileMimeType(
+                            //   message.file
+                            // )};base64, ${message.filebase64.split(",")[1]}`}
+                            // target="_blank"
+                          >
+                            Download {message.file}
+                            <img
+                              src={`data:${getFileMimeType(
+                                message.file
+                              )};base64, ${message.filebase64.split(",")[1]}`}
+                              // src={`data:image/jpeg;base64, ${
+                              //   message.filebase64.split(",")[1]
+                              // }`}
+                              // src={base64ToFile(message.filebase64, message.file)}
+                              alt={message.file}
+                            /> */}
                           <a
                             className="flex items-center gap-1 border-b"
-                            href={
-                              "http://localhost:4000/uploads/" + message.file
-                            }
-                            target="_blank"
+                            href={`${message.filebase64}`}
+                            // href={`data:application/octet-stream;base64,${
+                            //   message.filebase64.split(",")[1]
+                            // }`}
+                            download="image"
+                            // href={
+                            //   "http://localhost:4000/uploads/" + message.file
+                            // }
+                            // target="_blank"
                           >
                             <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
+                              className="w-5 h-5"
+                            >
+                              <path d="M10.75 2.75a.75.75 0 00-1.5 0v8.614L6.295 8.235a.75.75 0 10-1.09 1.03l4.25 4.5a.75.75 0 001.09 0l4.25-4.5a.75.75 0 00-1.09-1.03l-2.955 3.129V2.75z" />
+                              <path d="M3.5 12.75a.75.75 0 00-1.5 0v2.5A2.75 2.75 0 004.75 18h10.5A2.75 2.75 0 0018 15.25v-2.5a.75.75 0 00-1.5 0v2.5c0 .69-.56 1.25-1.25 1.25H4.75c-.69 0-1.25-.56-1.25-1.25v-2.5z" />
+                            </svg>
+
+                            {/* <svg
                               xmlns="http://www.w3.org/2000/svg"
                               viewBox="0 0 24 24"
                               fill="currentColor"
@@ -339,7 +410,7 @@ const Chat = () => {
                                 d="M18.97 3.659a2.25 2.25 0 00-3.182 0l-10.94 10.94a3.75 3.75 0 105.304 5.303l7.693-7.693a.75.75 0 011.06 1.06l-7.693 7.693a5.25 5.25 0 11-7.424-7.424l10.939-10.94a3.75 3.75 0 115.303 5.304L9.097 18.835l-.008.008-.007.007-.002.002-.003.002A2.25 2.25 0 015.91 15.66l7.81-7.81a.75.75 0 011.061 1.06l-7.81 7.81a.75.75 0 001.054 1.068L18.97 6.84a2.25 2.25 0 000-3.182z"
                                 clipRule="evenodd"
                               />
-                            </svg>
+                            </svg> */}
                             {message.file}
                           </a>
                         </div>

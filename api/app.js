@@ -318,9 +318,10 @@ wss.on("connection", (connection, req) => {
 
   connection.on("message", async (message) => {
     const messageData = JSON.parse(message.toString());
-    // console.log(messageData);
+    console.log(messageData);
     const { recipient, text, file } = messageData;
     let filename = null;
+    const base64Image = file ? file.data : null;
     if (file) {
       //here data is 64 encoded
       console.log({ file });
@@ -329,7 +330,10 @@ wss.on("connection", (connection, req) => {
       const ext = parts[parts.length - 1];
       filename = Date.now() + "." + ext;
       const path = __dirname + "/uploads/" + filename; //it will save the file in the upload directory
-      const bufferData = new Buffer(file.data.split(",")[1], "base64");
+      const bufferData = new Buffer.from(file.data.split(",")[1], "base64");
+      // base64Image = file.toString("base64");
+      // base64Image = file.data.split(",")[1];
+      // const imgbase64 = file.data.split(",")[1];
       fs.writeFile(path, bufferData, () => {
         console.log("file saved" + path);
       });
@@ -341,6 +345,7 @@ wss.on("connection", (connection, req) => {
         recipient,
         text,
         file: file ? filename : null,
+        filebase64: file ? base64Image : null,
       });
       console.log("message created");
       //we can use find method here but it will just point to the very first user only but if the user is connected with more than one devices than filter will find all of them thus we use filter here
@@ -354,6 +359,7 @@ wss.on("connection", (connection, req) => {
               sender: connection.userId,
               recipient,
               file: file ? filename : null,
+              filebase64: file ? base64Image : null,
               _id: messageDoc._id,
             })
           )

@@ -36,11 +36,13 @@ function Register() {
             console.log(res.Cookies);
             setLoggedInUsername(email);
             setId(res.data.id);
-            // const d = new Date();
-            // d.setTime(d.getTime() + exdays * 24 * 60 * 60 * 1000);
-            // let expires = "expires=" + d.toUTCString();
-            // document.cookie = `token=${res.data.token}; expires=Thu, 18 Dec 2013 12:00:00 UTC; path=/`;
-            document.cookie = `token=${res.data.token}`;
+            const d = new Date();
+            d.getTime();
+            //  d.setTime(d.getTime() + exdays * 24 * 60 * 60 * 1000);
+            d.setTime(d.getTime() + 24 * 60 * 60 * 1000);
+            let expires = "expires=" + d.toUTCString();
+            // document.cookie = `token=${res.data.token}`;
+            document.cookie = `token=${res.data.token}; ${expires}; path=/;`;
             console.log(res);
           })
           .catch((e) => {
@@ -57,7 +59,13 @@ function Register() {
             // console.log(res.Cookies);
             setLoggedInUsername(email);
             setId(res.data.id);
-            document.cookie = `token=${res.data.token}`;
+            const d = new Date();
+            d.getTime();
+            //  d.setTime(d.getTime() + exdays * 24 * 60 * 60 * 1000);
+            d.setTime(d.getTime() + 24 * 60 * 60 * 1000);
+            let expires = "expires=" + d.toUTCString();
+            // document.cookie = `token=${res.data.token}`;
+            document.cookie = `token=${res.data.token}; ${expires}; path=/;`;
             console.log(res);
           })
           .catch((e) => {
