@@ -383,7 +383,7 @@ const Chat = () => {
                             // href={`data:application/octet-stream;base64,${
                             //   message.filebase64.split(",")[1]
                             // }`}
-                            download="image"
+                            download={message.file}
                             // href={
                             //   "http://localhost:4000/uploads/" + message.file
                             // }

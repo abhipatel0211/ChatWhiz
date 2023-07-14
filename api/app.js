@@ -179,7 +179,7 @@ app.post("/login", async (req, res) => {
         console.log("password wrong");
       }
     } else {
-      console.log("not found");
+      console.log("email not found");
     }
   } catch (err) {
     console.log(err);
