@@ -47,6 +47,10 @@ mongoose
 const jwtSecret = process.env.JWT_SECRET;
 const bcryptSalt = bcrypt.genSaltSync(10);
 
+app.get("/", async (req, res) => {
+  res.json("test ok");
+});
+
 function getUserDataFromRequest(req) {
   // console.log("hello "+req.cookies.token);
   return new Promise((resolve, reject) => {
