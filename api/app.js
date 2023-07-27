@@ -329,14 +329,14 @@ wss.on("connection", (connection, req) => {
       const parts = file.name.split(".");
       const ext = parts[parts.length - 1];
       filename = Date.now() + "." + ext;
-      const path = __dirname + "/uploads/" + filename; //it will save the file in the upload directory
+      // const path = __dirname + "/uploads/" + filename; //it will save the file in the upload directory
       const bufferData = new Buffer.from(file.data.split(",")[1], "base64");
       // base64Image = file.toString("base64");
       // base64Image = file.data.split(",")[1];
       // const imgbase64 = file.data.split(",")[1];
-      fs.writeFile(path, bufferData, () => {
-        console.log("file saved" + path);
-      });
+      // fs.writeFile(path, bufferData, () => {
+      //   console.log("file saved" + path);
+      // });
     }
     if (recipient && (text || file)) {
       //now first save the message

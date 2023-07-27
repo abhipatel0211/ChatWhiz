@@ -5,6 +5,7 @@ import { UserContext } from "./UserContext";
 import { uniqBy } from "lodash";
 import axios from "axios";
 import Contact from "./Contact";
+import config from "../../config";
 
 const Chat = () => {
   const [ws, setWs] = useState(null);
@@ -21,7 +22,8 @@ const Chat = () => {
   }, []);
 
   function connectToWs() {
-    const ws = new WebSocket("ws://localhost:4000");
+    // const ws = new WebSocket("ws://localhost:4000");
+    const ws = new WebSocket(`ws://${config.REACT_APP_WS_URL}`);
 
     ws.addEventListener("open", () => {
       // console.log("Connected to WebSocket");
@@ -54,7 +56,7 @@ const Chat = () => {
 
   function logout() {
     axios
-      .post("http://localhost:4000/logout")
+      .post(`${config.REACT_APP_BACKEND_URL}/logout`)
       .then(() => {
         setWs(null);
         setId(null);
@@ -117,14 +119,24 @@ const Chat = () => {
     ]);
     if (file) {
       axios
-        .get("http://localhost:4000/messages/" + selectedUserId, {
+        .get(`${config.REACT_APP_BACKEND_URL}/messages/` + selectedUserId, {
           withCredentials: true,
         })
         .then((res) => {
           // Handle the response data
-          // console.log(response.data);
+          // console.log(`hello${res.data}`);
           // const { data } = res;
           setMessages(res.data);
+          setMessages((prev) => [
+            ...prev,
+            {
+              text: newMessageText,
+              sender: id,
+              recipient: selectedUserId,
+              _id: Date.now(),
+              file,
+            },
+          ]);
           // Perform further actions with the data
         })
         .catch((error) => {
@@ -148,14 +160,24 @@ const Chat = () => {
   function sendFile(ev) {
     // console.log(ev.target.files); // we will get the file here
     // const file = ev.taret.file[0];
-    const reader = new FileReader();
-    reader.readAsDataURL(ev.target.files[0]);
-    reader.onload = () => {
-      sendMessage(null, {
-        name: ev.target.files[0].name,
-        data: reader.result,
-      });
-    };
+    const maxFileSize = (1 / 2) * 1024 * 1024; //1 mb
+    // alert(ev.target.files[0].size);
+    // console.log(ev.target.files.size);
+    if (ev.target.files && ev.target.files[0].size > maxFileSize) {
+      alert(
+        "File size exceeds the allowed limit. Please choose a smaller file. (0.5 MB)"
+      );
+      fileInput.value = ""; // Clear the file input to allow the user to choose a different file
+    } else {
+      const reader = new FileReader();
+      reader.readAsDataURL(ev.target.files[0]);
+      reader.onload = () => {
+        sendMessage(null, {
+          name: ev.target.files[0].name,
+          data: reader.result,
+        });
+      };
+    }
   }
 
   useEffect(() => {
@@ -168,7 +190,7 @@ const Chat = () => {
   }, [messages]);
 
   useEffect(() => {
-    axios.get("http://localhost:4000/people").then((res) => {
+    axios.get(`${config.REACT_APP_BACKEND_URL}/people`).then((res) => {
       const offlinePeopleArr = res.data
         .filter((p) => p._id !== id) // here it will first filter and remove the person itself
         .filter((p) => !Object.keys(onlinePeople).includes(p._id)); //now here it will filter the person that are online by the object as online people is the object and now it
@@ -188,7 +210,7 @@ const Chat = () => {
     if (selectedUserId) {
       // console.log("hello message");
       axios
-        .get("http://localhost:4000/messages/" + selectedUserId, {
+        .get(`${config.REACT_APP_BACKEND_URL}/messages/` + selectedUserId, {
           withCredentials: true,
         })
         .then((res) => {
@@ -196,6 +218,7 @@ const Chat = () => {
           // console.log(res.data.filebase64);
           // if(res.data.)
           // const { data } = res;
+          // setNewMessageText("");
           setMessages(res.data);
           // Perform further actions with the data
         })
@@ -210,14 +233,16 @@ const Chat = () => {
     // console.log(ev);
     // console.log("new message", ev.data);
     const messageData = JSON.parse(ev.data);
-    console.log(ev, messageData);
+    // console.log(messageData);
     if ("online" in messageData) {
       showOnlinePeople(messageData.online);
     } else if ("text" in messageData) {
       // console.log({ messageData });
 
       //now to handle the message received by the other user we have to put it in the messages array as down
-      if (sender === selectedUserId) {
+      const sender = messageData.sender;
+      // console.log(selectedUserId);
+      if (messageData.sender === selectedUserId) {
         setMessages((prev) => [...prev, { ...messageData }]);
       }
     }
