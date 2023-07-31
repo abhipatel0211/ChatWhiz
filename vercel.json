@@ -1,7 +1,8 @@
 {
   "buildCommand": "cd client && yarn install && yarn build",
+  "outputDirectory": "client/dist",
   "framework": "vite",
-  "rewrite": [
+  "redirects": [
     {
       "source": "/api/(.*)",
       "destination": "/api/app.js"
