@@ -31,23 +31,27 @@ function Register() {
           .post(`${config.REACT_APP_BACKEND_URL}/${url}`, { email, password })
           .then((res) => {
             //After Register
-            console.log(res.headers);
-            console.log(res);
-            console.log("Hello");
-            console.log(res.Cookies);
-            setLoggedInUsername(email);
-            setId(res.data.id);
-            const d = new Date();
-            d.getTime();
-            //  d.setTime(d.getTime() + exdays * 24 * 60 * 60 * 1000);
-            d.setTime(d.getTime() + 24 * 60 * 60 * 1000);
-            let expires = "expires=" + d.toUTCString();
-            // document.cookie = `token=${res.data.token}`;
-            document.cookie = `token=${res.data.token}; ${expires}; path=/;`;
-            console.log(res);
+            if (res.data === "email_already_exist") {
+              alert("username already exist use other username");
+            } else {
+              console.log(res.headers);
+              console.log(res);
+              console.log("Hello");
+              console.log(res.Cookies);
+              setLoggedInUsername(email);
+              setId(res.data.id);
+              const d = new Date();
+              d.getTime();
+              //  d.setTime(d.getTime() + exdays * 24 * 60 * 60 * 1000);
+              d.setTime(d.getTime() + 24 * 60 * 60 * 1000);
+              let expires = "expires=" + d.toUTCString();
+              // document.cookie = `token=${res.data.token}`;
+              document.cookie = `token=${res.data.token}; ${expires}; path=/;`;
+              console.log(res);
+            }
           })
           .catch((e) => {
-            console.log("error in try ", e);
+            console.log("error in try of register", e);
           });
       } else if (url === "login") {
         await axios
@@ -58,19 +62,27 @@ function Register() {
             // console.log(res);
             // console.log("Hello")
             // console.log(res.Cookies);
-            setLoggedInUsername(email);
-            setId(res.data.id);
-            const d = new Date();
-            d.getTime();
-            //  d.setTime(d.getTime() + exdays * 24 * 60 * 60 * 1000);
-            d.setTime(d.getTime() + 24 * 60 * 60 * 1000);
-            let expires = "expires=" + d.toUTCString();
-            // document.cookie = `token=${res.data.token}`;
-            document.cookie = `token=${res.data.token}; ${expires}; path=/;`;
-            console.log(res);
+            // if(res)
+            if (res.data === "wrong_password") {
+              alert("Wrong Password Try again");
+            } else if (res.data === "no_email") {
+              alert("No user found Please create your account");
+            } else {
+              console.log(res);
+              setLoggedInUsername(email);
+              setId(res.data.id);
+              const d = new Date();
+              d.getTime();
+              //  d.setTime(d.getTime() + exdays * 24 * 60 * 60 * 1000);
+              d.setTime(d.getTime() + 24 * 60 * 60 * 1000);
+              let expires = "expires=" + d.toUTCString();
+              // document.cookie = `token=${res.data.token}`;
+              document.cookie = `token=${res.data.token}; ${expires}; path=/;`;
+              console.log(res);
+            }
           })
           .catch((e) => {
-            console.log("error in try ", e);
+            console.log("error in try of login ", e);
           });
       }
     } catch (err) {
