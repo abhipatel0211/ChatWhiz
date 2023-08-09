@@ -148,11 +148,11 @@ app.post("/login", async (req, res) => {
   try {
     const foundemail = await User.findOne({ email });
     if (foundemail) {
-      console.log(email);
+      // console.log(email);
       const passOk = bcrypt.compareSync(password, foundemail.password);
       // console.log(passOk);
       if (passOk) {
-        console.log(password);
+        // console.log(password);
         jwt.sign(
           { userId: foundemail._id, email },
           jwtSecret,
@@ -165,10 +165,10 @@ app.post("/login", async (req, res) => {
             // console.log(token);
             res
               .cookie("token", token, {
-                domain: "localhost",
+                // domain: "localhost",
                 path: "/",
-                secure: true,
-                httpOnly: true,
+                // secure: true,
+                // httpOnly: true,
                 expires: new Date(Date.now() + 50000),
               })
               .status(201)
@@ -180,11 +180,11 @@ app.post("/login", async (req, res) => {
           }
         );
       } else {
-        console.log("password wrong ");
+        // console.log("password wrong ");
         res.json("wrong_password");
       }
     } else {
-      console.log("email not found");
+      // console.log("email not found");
       res.json("no_email");
     }
   } catch (err) {
@@ -200,13 +200,13 @@ app.post("/logout", (req, res) => {
 // const db = "mongodb://127.0.0.1:27017/mern-chat";
 app.post("/register", async (req, res) => {
   // res.json("inside reg");
-  console.log(req.body);
+  // console.log(req.body);
   const { email, password } = req.body;
   // console.log(email);
   try {
     const foundemail = await User.findOne({ email });
     if (foundemail) {
-      console.log("already exist from register");
+      // console.log("already exist from register");
       res.json("email_already_exist");
     } else {
       const hashpassword = bcrypt.hashSync(password, bcryptSalt);
@@ -294,7 +294,7 @@ wss.on("connection", (connection, req) => {
       clearInterval(connection.deathTimer);
       clearInterval(connection.timer);
       connection.terminate();
-      console.log("dead");
+      // console.log("dead");
       notifyAboutOnlinePeople();
     }, 1000);
   }, 5000); //here it will check after every 10 seconds that is the connection is online with the ping method
@@ -330,14 +330,14 @@ wss.on("connection", (connection, req) => {
 
   connection.on("message", async (message) => {
     const messageData = JSON.parse(message.toString());
-    console.log(messageData);
+    // console.log(messageData);
     const { recipient, text, file } = messageData;
     let filename = null;
     const base64Image = file ? file.data : null;
     if (file) {
       //here data is 64 encoded
-      console.log({ file });
-      console.log("size", file.data.length);
+      // console.log({ file });
+      // console.log("size", file.data.length);
       const parts = file.name.split(".");
       const ext = parts[parts.length - 1];
       filename = Date.now() + "." + ext;
@@ -359,7 +359,7 @@ wss.on("connection", (connection, req) => {
         file: file ? filename : null,
         filebase64: file ? base64Image : null,
       });
-      console.log("message created");
+      // console.log("message created");
       //we can use find method here but it will just point to the very first user only but if the user is connected with more than one devices than filter will find all of them thus we use filter here
       // console.log("hello");
       [...wss.clients]
