@@ -12,7 +12,7 @@ const fs = require("fs");
 
 const cors = require("cors");
 const app = express();
-app.use("/uploads", express.static(__dirname + "/uploads"));
+// app.use("/uploads", express.static(__dirname + "/uploads"));
 app.use(cors());
 
 console.log(process.env.CLIENT_URL);
