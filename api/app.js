@@ -31,7 +31,7 @@ app.use(cookieParser());
 
 app.use(
   cors({
-    origin: "http://localhost:5173", // Replace with the URL of your frontend application
+    origin: "https://chatwhiz.vercel.app", // Replace with the URL of your frontend application
     credentials: true, // Set the "Access-Control-Allow-Credentials" header to "true"
   })
 );
@@ -226,10 +226,10 @@ app.post("/register", async (req, res) => {
           // console.log(token);
           res
             .cookie("token", token, {
-              domain: "localhost",
+              // domain: "localhost",
               // path: '/',
               secure: true,
-              httpOnly: true,
+              // httpOnly: true,
               expires: new Date(Date.now() + 5000),
             })
             .status(201)
