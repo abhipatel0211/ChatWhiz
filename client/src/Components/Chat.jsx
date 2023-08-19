@@ -160,7 +160,7 @@ const Chat = () => {
   function sendFile(ev) {
     // console.log(ev.target.files); // we will get the file here
     // const file = ev.taret.file[0];
-    const maxFileSize = (1 / 2) * 1024 * 1024; //1 mb
+    const maxFileSize = (1 / 2) * 1024 * 1024; //0.5 mb
     // alert(ev.target.files[0].size);
     // console.log(ev.target.files.size);
     if (ev.target.files && ev.target.files[0].size > maxFileSize) {
@@ -242,7 +242,7 @@ const Chat = () => {
       //now to handle the message received by the other user we have to put it in the messages array as down
       const sender = messageData.sender;
       // console.log(selectedUserId);
-      if (messageData.sender === selectedUserId) {
+      if (sender === selectedUserId) {
         setMessages((prev) => [...prev, { ...messageData }]);
       }
     }
