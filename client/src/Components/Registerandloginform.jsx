@@ -93,7 +93,8 @@ function Register() {
   return (
     <>
       {/* bg-blue-100 bg-[#6C63FF]   #ECECEC*/}
-      <div className="flex bg-[#bd91e6] m-2 h-full">
+      {/* <div className="">hello</div> */}
+      <div className="flex bg-[#bd91e6] h-full overflow-hidden">
         <div className="mx-7 w-1/2 max-md:hidden md:flex lg:flex items-center justify-center">
           {/* <img src="\src\assets\svg\login_chat.svg" alt="SVG Image" /> */}
           <svg
@@ -235,8 +236,12 @@ function Register() {
             />
           </svg>
         </div>
-        <div className=" h-screen w-1/2 max-md:w-full  flex items-center">
-          <form className="w-64 mx-auto" onSubmit={handlesubmit}>
+        <div className=" w-1/2 max-md:w-full  flex items-center">
+          {/* <div className="bg-white flex h-20 w-20 top-0 left-0 "></div> */}
+          <form
+            className="w-64 mx-auto h-full flex flex-col items-center  justify-center"
+            onSubmit={handlesubmit}
+          >
             {/* <p>Register</p> */}
             <input
               value={email}
@@ -281,6 +286,21 @@ function Register() {
                 </button>
               </div>
             )}
+            <div className="flex flex-col justify-center  w-full bottom-0">
+              {/* As Vercel does not support the real time communication see project
+              here.{" "} */}
+              <div className="flex justify-center">
+                <strong>
+                  github :{" "}
+                  <a
+                    href="https://github.com/abhipatel0211/ChatWhiz.git"
+                    className="text-blue-500"
+                  >
+                    Click here
+                  </a>
+                </strong>
+              </div>
+            </div>
           </form>
         </div>
       </div>
