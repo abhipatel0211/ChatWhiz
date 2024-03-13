@@ -1,10 +1,11 @@
-#steps to run the project
+# steps to run the project
 
 step 1. Clone the repository
 
 step 2. Add the .env file  in both api and client folder
 
 step 3. in the .env file of client add this 
+
 ```
 REACT_API_BASE_URL="http://localhost:4000",
 VITE_API_BASE_WS = "localhost:4000"
