@@ -6,6 +6,8 @@ import { uniqBy } from "lodash";
 import axios from "axios";
 import Contact from "./Contact";
 import config from "../../config";
+import notify from "../assets/sound.mp3";
+// import notify from "..//assets/sound.mp3";
 
 const Chat = () => {
   const [ws, setWs] = useState(null);
@@ -98,7 +100,24 @@ const Chat = () => {
 
   function sendMessage(ev, file = null) {
     if (ev) ev.preventDefault();
-    // console.log("sending message");
+    // console.log("sending message", newMessageText);
+    const message = newMessageText.trim();
+    // console.log(message);
+    if (!message) {
+      // console.log("no msg");
+      alert("Add text in message box");
+      return;
+    }
+    // setNewMessageText(newans);
+    // newMessageText = newans;
+    // console.log(newMessageText.length);
+    // console.log(newMessageText);
+    // if (newMessageText[0] == " ") {
+    //   console.log("space found");
+    // }
+    // if (!newMessageText) {
+    //   return;
+    // }
 
     ws.send(
       JSON.stringify({
@@ -234,8 +253,18 @@ const Chat = () => {
     // console.log("new message", ev.data);
     const messageData = JSON.parse(ev.data);
     // console.log(messageData);
+    // console.log(selectedUserId);
+    console.log(id);
+    if (id == messageData.recipient) {
+      // console.log("yes found");
+      var audio = new Audio(notify);
+      audio.play();
+    }
     if ("online" in messageData) {
       showOnlinePeople(messageData.online);
+      // if(messageData.recipient == )
+      // if(messageData.)
+      // console.log("hello0");
     } else if ("text" in messageData) {
       // console.log({ messageData });
 
@@ -458,6 +487,29 @@ const Chat = () => {
               placeholder="Type your message here"
               // required
             />
+
+            <label className="bg-blue-300 text-gray-600 p-2 rounded-md border-blue-200 cursor-pointer">
+              <input
+                className="hidden"
+                onClick={() => {
+                  console.log("clicked on mic");
+                }}
+              />
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                fill="none"
+                viewBox="0 0 24 24"
+                strokeWidth={1.5}
+                stroke="currentColor"
+                className="w-6 h-6"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  d="M12 18.75a6 6 0 0 0 6-6v-1.5m-6 7.5a6 6 0 0 1-6-6v-1.5m6 7.5v3.75m-3.75 0h7.5M12 15.75a3 3 0 0 1-3-3V4.5a3 3 0 1 1 6 0v8.25a3 3 0 0 1-3 3Z"
+                />
+              </svg>
+            </label>
             <label className="bg-blue-300 text-gray-600 p-2 rounded-md border-blue-200 cursor-pointer">
               <input type="file" className="hidden" onChange={sendFile} />
               <svg
