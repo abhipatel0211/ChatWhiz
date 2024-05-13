@@ -31,7 +31,7 @@ app.use(cookieParser());
 
 app.use(
   cors({
-    origin: "https://chatwhiz.vercel.app", // Replace with the URL of your frontend application
+    origin: "http://localhost:5173", // Replace with the URL of your frontend application
     credentials: true, // Set the "Access-Control-Allow-Credentials" header to "true"
   })
 );

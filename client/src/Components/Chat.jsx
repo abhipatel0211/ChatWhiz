@@ -2,7 +2,7 @@ import React, { useContext, useEffect, useRef, useState } from "react";
 import Avtar from "./Avtar";
 import Logo from "./Logo";
 import { UserContext } from "./UserContext";
-import { uniqBy } from "lodash";
+import { floor, uniqBy } from "lodash";
 import axios from "axios";
 import Contact from "./Contact";
 import config from "../../config";
@@ -103,8 +103,8 @@ const Chat = () => {
     // console.log("sending message", newMessageText);
     const message = newMessageText.trim();
     // console.log(message);
-    if (!message) {
-      // console.log("no msg");
+    if (!message && file == null) {
+      console.log("no msg");
       alert("Add text in message box");
       return;
     }
@@ -177,7 +177,7 @@ const Chat = () => {
   }
 
   function sendFile(ev) {
-    // console.log(ev.target.files); // we will get the file here
+    console.log(ev.target.files); // we will get the file here
     // const file = ev.taret.file[0];
     const maxFileSize = (1 / 2) * 1024 * 1024; //0.5 mb
     // alert(ev.target.files[0].size);
@@ -323,11 +323,50 @@ const Chat = () => {
   //       return "application/octet-stream";
   //   }
   // }
+  const [isDragging, setIsDragging] = useState(false);
+  const [width, setWidth] = useState(33.33); // Initial width in percentage
+
+  useEffect(() => {
+    const handleMouseMove = (event) => {
+      if (!isDragging) return;
+      let newWidth = (event.clientX / window.innerWidth) * 100;
+      if (newWidth < 25) {
+        newWidth = 25;
+      } else if (newWidth > 70) {
+        newWidth = 70;
+      }
+      console.log("New width:", newWidth);
+      setWidth(newWidth);
+    };
+
+    const handleMouseUp = () => {
+      if (!isDragging) return;
+      setIsDragging(false);
+      console.log("Mouse up");
+    };
+
+    document.addEventListener("mousemove", handleMouseMove);
+    document.addEventListener("mouseup", handleMouseUp);
+
+    return () => {
+      document.removeEventListener("mousemove", handleMouseMove);
+      document.removeEventListener("mouseup", handleMouseUp);
+    };
+  }, [isDragging]);
+
+  const handleMouseDown = () => {
+    setIsDragging(true);
+    console.log("Mouse down");
+  };
+
+  useEffect(() => {
+    console.log("isDragging:", isDragging);
+  }, [isDragging]);
 
   return (
-    <div className="flex h-screen">
-      <div className="bg-white w-1/3 flex flex-col">
-        <div className="flex-grow">
+    <div className="flex h-screen ">
+      <div className={`bg-white flex`} style={{ width: `${width}%` }}>
+        <div className="flex flex-col flex-grow ">
           <Logo />
           {Object.keys(onlinePeopleExclOurUser).map((userId) => (
             <Contact
@@ -349,32 +388,44 @@ const Chat = () => {
               selected={userId === selectedUserId}
             />
           ))}
-        </div>
-        <div className="p-2 text-center flex items-center  justify-center">
-          <span className="mr-2 text-sm text-gray-600 flex items-center">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="currentColor"
-              className="w-4 h-4"
+          <div className="p-2 flex-1 text-center flex justify-center items-end">
+            <span className="mr-2 text-sm text-gray-600 flex items-center justify-center">
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="currentColor"
+                className="w-4 h-4"
+              >
+                <path
+                  fillRule="evenodd"
+                  d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z"
+                  clipRule="evenodd"
+                />
+              </svg>
+              {email}
+            </span>
+            <button
+              onClick={logout}
+              className="text-sm text-gray-600 bg-blue-200 py-1 px-2 border rounded-sm h-fit"
             >
-              <path
-                fillRule="evenodd"
-                d="M7.5 6a4.5 4.5 0 119 0 4.5 4.5 0 01-9 0zM3.751 20.105a8.25 8.25 0 0116.498 0 .75.75 0 01-.437.695A18.683 18.683 0 0112 22.5c-2.786 0-5.433-.608-7.812-1.7a.75.75 0 01-.437-.695z"
-                clipRule="evenodd"
-              />
-            </svg>
-            {email}
-          </span>
-          <button
-            onClick={logout}
-            className="text-sm text-gray-600 bg-blue-200 py-1 px-2 border rounded-sm"
+              logout
+            </button>
+          </div>
+        </div>
+        <div
+          className="resize-handle flex justify-center items-center"
+          onMouseDown={handleMouseDown}
+        >
+          <div
+            className="h-full resize-handle bg-gray-200 w-1 cursor-col-resize"
+            onMouseDown={handleMouseDown}
           >
-            logout
-          </button>
+            {/* &#x2194; */}
+          </div>
         </div>
       </div>
-      <div className="flex flex-col bg-blue-200 w-2/3 p-2">
+
+      <div className="flex flex-1 flex-col bg-blue-200 p-2">
         <div className="flex-grow">
           {!selectedUserId && (
             <div className="flex h-full flex-grow items-center justify-center">
@@ -478,7 +529,7 @@ const Chat = () => {
           )}
         </div>
         {!!selectedUserId && ( //two !! means it will be in true or false
-          <form className="flex mx-2 gap-2" onSubmit={sendMessage}>
+          <form className="flex mx-2 gap-2">
             <input
               type="text"
               className="flex-grow bg-white border p-2 rounded-md"
@@ -526,8 +577,9 @@ const Chat = () => {
               </svg>
             </label>
             <button
-              type="submit"
+              type="button"
               className=" bg-blue-500 text-white p-2 rounded-md"
+              onClick={sendMessage}
             >
               <svg
                 xmlns="http://www.w3.org/2000/svg"
